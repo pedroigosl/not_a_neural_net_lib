@@ -1,11 +1,13 @@
 class Node():
-    def __init__(self, id, value):
-        
+    def __init__(self, id, value, flag = None, edges = None):
+        # int
         self._id = id
-        
+        # your object
         self.value = value
-        
-        self.edges = None
+        #int
+        self.flag = flag
+        # set
+        self.edges = edges
         
     def __eq__(self, node):
         return isinstance(node, Node) and self.id == node.id
@@ -22,39 +24,71 @@ class Node():
             self.value = value
             return
         return
-    
-    @property    
-    def value(self):
+        
+    def get_value(self):
         return self.value
     
-    @property
-    def edges(self):
+    def set_edges(self, edges):
+        for edge in edges:
+            if not (edge in self.edges):
+                self.add_edge(edge)
+            
+    def add_edge(self, edge):
+        if not (edge in self.edges):
+            self.edges.add(edge)
+            
+    def update_edge(self, node, weight):
+        edge = Edge(node, weight)
+        self.delete_edge(node)
+        self.add_edge(edge)
+        
+    def delete_edge(self, node):
+        edge = Edge(node)
+        self.edges.discard(edge)
+        
+    def create_edge(self, node, weight = None):
+        new_edge = Edge(node, weight)
+        self.add_edge(new_edge)
+        
+    def is_neighbour(self, node):
+        edge = Edge(node)
+        if (edge in self.edges):
+            return True
+    def get_edges(self):
         return self.edges
         
 
 class Edge():
-    def __init__(self, node_a, node_b, weight = None):
-        self.node_a = node_a
-        self.node_b = node_b
+    def __init__(self, node, weight = None):
+        self.node = node
         self.weight = weight
-        
-    def as_tuple(self):
-        return (self.node_a, self.node_b, self.weight)
     
-    def as_dict(self):
-        return {'node1': self.node_a, 'node2': self.node_b, 'weight': self.weight}
+    def __eq__(self, edge):
+        return isinstance(edge, Edge) and self.node.id == edge.node.id
+    
+    def __hash__(self):
+        return hash(self.node.id)
+    
+    @property    
+    def tuple(self):
+        tup = (self.node, self.weight)
+        return tup
+    
+    @property
+    def dict(self):
+        dic = {'node': self.node, 'weight': self.weight}
+        return dic
     
     def in_edge(self, node):
-        result = (False, False)
-        if self.node_a == node:
-            result[0] = True
-        if self.node_b == node:
-            result[1] = True
         
-        if result[0] or result[1]:
-            return (True, result)
+        if self.node == node:
+            return (True, self.weight)
+
         return False
 
+    def get_weight(self):
+        return self.weight
+    
 class Graph():
     def __init__(self, weighted = False, directed = False, reflexive = False, symmetric = False, transitive = False):
         
