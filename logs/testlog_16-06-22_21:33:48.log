@@ -1,0 +1,9 @@
+INFO:root:test
+WARNING:root:test1
+INFO:root:test2
+INFO:root:
+Graph properties changed. New properties are:
+    reflexive:  True
+    symmetric:  False
+    transitive: True
+

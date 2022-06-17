@@ -1,5 +1,22 @@
+from typing import List, Any, Optional
+from __future__ import annotations
+import logging
+import warnings
+import time
+
+log_date = str(time.strftime("%d-%m-%y_%H:%M:%S"))
+log_name = f"logs/graph_{log_date}.log"
+logging.basicConfig(filename=log_name, filemode='w', level=logging.DEBUG)
+print(f"Session log started at {log_name}")
+
+warnings.simplefilter("always")
+
+warning = f" This library is a work in progress and not yet functional"
+warnings.warn(warning, ResourceWarning)
+
+
 class Node():
-    def __init__(self, id, value, flag = None, edges = None):
+    def __init__(self, id, value, flag, edges):
         # int
         self._id = id
         # your object
@@ -20,12 +37,13 @@ class Node():
         return self._id
     
     def set_value(self, value):
-        if not self.value:
-            self.value = value
-            return
-        return
+        self.value = value
         
     def get_value(self):
+        if not self.value:
+            error = f" ValueError - No value declared in node #{self.id}"
+            logging.error(error)
+            raise ValueError()
         return self.value
     
     def set_edges(self, edges):
@@ -90,9 +108,15 @@ class Edge():
         return self.weight
     
 class Graph():
-    def __init__(self, weighted = False, directed = False, reflexive = False, symmetric = False, transitive = False):
+    def __init__(self, root:Optional[Node] = None, weighted = False, 
+                       directed = False, 
+                       reflexive = False, 
+                       symmetric = False, 
+                       transitive = False):
         
-        self.root = None
+        self.root = root
+        self.nodes = set()
+        self.last_id = 1
         
         # Graph characteristics
         self.weighted = weighted
@@ -104,7 +128,7 @@ class Graph():
         self.transitive = transitive
         
     def set_relations(self, reflexive = False, symmetric = False, transitive = False):
-
+        raise NotImplementedError
         if  ((self.reflexive != reflexive) or 
             (self.symmetric != symmetric) or 
             (self.transitive != transitive)):
@@ -113,19 +137,62 @@ class Graph():
             self.symmetric = symmetric
             self.transitive = transitive
             
+            info = (f" Relations' properties changed. New properties are:\n"
+                    f" reflexive:     {reflexive}\n"
+                    f" symmetric:     {symmetric}\n"
+                    f" transitive:    {transitive}")             
+            logging.info(info)
             self.refactor()
             
         else:
+            info = (f" set_relations called, but no changes made. Current relations:"
+                    f" reflexive:     {reflexive}\n"
+                    f" symmetric:     {symmetric}\n"
+                    f" transitive:    {transitive}")
+            logging.info(info)
+            warning = f" Relations already as defined"
+            warnings.warn(warning, RuntimeWarning)
             ...
             
     def refactor(self):
+        raise NotImplementedError
         ...
         
-    def add_node(self):
+    def create_node(self, value: Any = None, flag: Any = None, edges: List[Edge] = None):
+        raise NotImplementedError
+        self.nodes.add(Node(self.last_id, value, flag, edges))
+        self.last_id += 1
         ...
+    
+    def add_node(self, node: Node):
+        warning = f" Using function with incomplete functionalities"
+        warnings.warn(warning, ResourceWarning)
         
-    def remove_node(self):
+        if node.id < 0 or not isinstance(node.id, int):
+            error = f" IndexError - id #{node.id} out of bounds"
+            logging.error(error)
+            raise IndexError
+        elif node.id <= self.last_id:
+            warning = f" ResourceWarning - node id #{node.id} not new"
+            warnings.warn(warning, ResourceWarning)
+            logging.warning(warning)
+            if node in self.nodes:
+                warning = f" ResourceWarning - node id #{node.id} in use, replacing node"
+                warnings.warn(warning, ResourceWarning)
+                logging.warning(warning)
+                self.remove_node(node.id)
+                
+            self.nodes.add(node)
+                
+        self.last_id = node.id + 1
+        info = f" Node with id #{node.id} added"
+        logging.info(info)
+        
+        
+    def remove_node(self, id):
+        raise NotImplementedError
         ...
         
     def is_connected(self):
+        raise NotImplementedError
         ...
